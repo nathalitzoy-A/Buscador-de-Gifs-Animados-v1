@@ -1,25 +1,49 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { environment } from '@environments/environment';
 import { GiphyResponse } from '../interface/gipy.interfaces';
 import { Gif } from '../interface/gif.interface';
 import { GifMapper } from '../mapper/gif.mapper';
 import { map, Observable, tap } from 'rxjs';
 
+const loadFronmLocalStorage = (isBrowser: boolean) => {
+  if (!isBrowser) return {};
+  const gifsFromLocalStorage = localStorage.getItem('gifs') ?? '{}';
+  const gifs = JSON.parse(gifsFromLocalStorage);
+  return gifs;
+};
+
 @Injectable({ providedIn: 'root' })
 export class GifService {
   private http = inject(HttpClient);
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   trendingGifs = signal<Gif[]>([]);
 
-  trendinfGifsLoading = signal(true);
+  trendingGifsLoading = signal(true);
 
-  searchHIstory = signal<Record<string, Gif[]>>({});
-  searchHistoryKeys = computed(() => Object.keys(this.searchHIstory()));
+  searchHistory = signal<Record<string, Gif[]>>(
+    loadFronmLocalStorage(this.isBrowser)
+  );
+  searchHistoryKeys = computed(() => Object.keys(this.searchHistory()));
 
   constructor() {
     this.loadTrendingGifs();
   }
+
+  saveGifsToLocalStorage = effect(() => {
+    if (!this.isBrowser) return;
+    const historyString = JSON.stringify(this.searchHistory());
+    localStorage.setItem('gifs', historyString);
+  });
 
   loadTrendingGifs() {
     this.http
@@ -32,7 +56,7 @@ export class GifService {
       .subscribe((resp) => {
         const gifs = GifMapper.mapGiphyItemToGifArray(resp.data);
         this.trendingGifs.set(gifs);
-        this.trendinfGifsLoading.set(false);
+        this.trendingGifsLoading.set(false);
         console.log({ gifs });
       });
   }
@@ -51,7 +75,7 @@ export class GifService {
         map((items) => GifMapper.mapGiphyItemToGifArray(items)),
 
         tap((items) => {
-          this.searchHIstory.update((history) => ({
+          this.searchHistory.update((history) => ({
             ...history,
             [query.toLocaleLowerCase()]: items,
           }));
@@ -60,6 +84,6 @@ export class GifService {
   }
 
   getHistoryGifs(query: string): Gif[] {
-    return this.searchHIstory()[query] ?? [];
+    return this.searchHistory()[query] ?? [];
   }
 }
