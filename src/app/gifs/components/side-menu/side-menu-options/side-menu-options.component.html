@@ -1,4 +1,4 @@
-<div id="nav" class="w-full px-6  flex flex-col justify-between h-full pt-6 ">
+<div id="nav" class="w-full h-full px-6 flex flex-col justify-between pt-6">
   <div class="flex flex-col justify-start">
 
 
@@ -11,7 +11,12 @@
       >
         <div >
           <!-- <i class="{{ item.icon }}"></i> -->
-          <i [class]="item.icon" [class.text-white]="rla.isActive" [class.text-[#c21d78]]="!rla.isActive"></i>
+          <i [class]="item.icon"
+             [ngClass]="{
+              'text-white': rla.isActive,
+              'bg-clip-text text-transparent bg-gradient-to-l from-[#ed8c34] to-[#c21d78]': !rla.isActive
+             }">
+          </i>
         </div>
         <div class="flex flex-col">
           <span class="text-lg font-bold leading-5 text-white">{{
@@ -34,7 +39,7 @@
 
         <a
       [routerLink]="['/dashboard/history', key]"
-      routerLinkActive="bg-blue-800"
+      routerLinkActive="bg-white/5"
       #rla2="routerLinkActive"
       class="w-full px-2 inline-flex space-x-2 items-center border-b border-slate-700 py-3 hover:bg-white/5 transition ease-linear duration-150"
     >
