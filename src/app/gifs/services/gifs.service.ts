@@ -50,7 +50,7 @@ export class GifService {
       .get<GiphyResponse>(`${environment.giphyUrl}/gifs/trending`, {
         params: {
           api_key: environment.giphyApiKey,
-          limit: 20,
+          limit: 21,
         },
       })
       .subscribe((resp) => {
@@ -66,7 +66,7 @@ export class GifService {
       .get<GiphyResponse>(`${environment.giphyUrl}/gifs/search`, {
         params: {
           api_key: environment.giphyApiKey,
-          limit: 20,
+          limit: 21,
           q: query,
         },
       })
