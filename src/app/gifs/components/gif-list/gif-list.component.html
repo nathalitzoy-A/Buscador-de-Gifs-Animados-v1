@@ -3,5 +3,7 @@
 
   <gif-list-item [imageUrl]="gif.url" />
 
+  } @empty {
+    <p class="col-span-full text-center text-gray-500">No se encontraron gifs con ese nombre</p>
   }
 </div>

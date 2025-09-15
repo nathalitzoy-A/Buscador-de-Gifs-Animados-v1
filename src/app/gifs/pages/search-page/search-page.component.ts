@@ -13,8 +13,10 @@ export default class SearchPageComponent {
   GifService = inject(GifService)  
   gifs = signal<Gif[]>([]);
   isLoading = signal<boolean>(false);
+  hasSearched = signal<boolean>(false);
 
   onSearch(query: string) {
+    this.hasSearched.set(true);
     this.isLoading.set(true);
     this.GifService.searchGifs(query).subscribe((resp) => {
       this.gifs.set(resp);

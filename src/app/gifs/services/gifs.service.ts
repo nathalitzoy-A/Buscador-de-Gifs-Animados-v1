@@ -8,11 +8,12 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { environment } from '@environments/environment';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { GiphyResponse } from '../interface/gipy.interfaces';
 import { Gif } from '../interface/gif.interface';
 import { GifMapper } from '../mapper/gif.mapper';
-import { map, Observable, tap } from 'rxjs';
 
 const loadFronmLocalStorage = (isBrowser: boolean) => {
   if (!isBrowser) return {};
@@ -25,6 +26,7 @@ const loadFronmLocalStorage = (isBrowser: boolean) => {
 export class GifService {
   private http = inject(HttpClient);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private router = inject(Router);
 
   trendingGifs = signal<Gif[]>([]);
 
@@ -53,7 +55,14 @@ export class GifService {
           limit: 21,
         },
       })
+      .pipe(
+        catchError(() => {
+          this.router.navigate(['/error']);
+          return of(undefined);
+        })
+      )
       .subscribe((resp) => {
+        if (!resp) return;
         const gifs = GifMapper.mapGiphyItemToGifArray(resp.data);
         this.trendingGifs.set(gifs);
         this.trendingGifsLoading.set(false);
@@ -92,6 +101,10 @@ export class GifService {
 
             return newHistory;
           });
+        }),
+        catchError(() => {
+          this.router.navigate(['/error']);
+          return of([]);
         })
       );
   }
@@ -101,7 +114,7 @@ export class GifService {
   }
 
   deleteSearchFromHistory(tag: string) {
-    this.searchHistory.update(currentHistory => {
+    this.searchHistory.update((currentHistory) => {
       const newHistory = { ...currentHistory };
       delete newHistory[tag];
       return newHistory;
