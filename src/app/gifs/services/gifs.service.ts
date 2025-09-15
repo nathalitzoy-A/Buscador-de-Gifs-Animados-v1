@@ -62,28 +62,49 @@ export class GifService {
   }
 
   searchGifs(query: string): Observable<Gif[]> {
+    const lowerCaseQuery = query.toLocaleLowerCase();
     return this.http
       .get<GiphyResponse>(`${environment.giphyUrl}/gifs/search`, {
         params: {
           api_key: environment.giphyApiKey,
           limit: 21,
-          q: query,
+          q: lowerCaseQuery,
         },
       })
       .pipe(
         map(({ data }) => data),
         map((items) => GifMapper.mapGiphyItemToGifArray(items)),
-
         tap((items) => {
-          this.searchHistory.update((history) => ({
-            ...history,
-            [query.toLocaleLowerCase()]: items,
-          }));
+          this.searchHistory.update((currentHistory) => {
+            const newHistory = { ...currentHistory };
+
+            if (newHistory[lowerCaseQuery]) {
+              delete newHistory[lowerCaseQuery];
+            }
+
+            newHistory[lowerCaseQuery] = items;
+
+            const keys = Object.keys(newHistory);
+            if (keys.length > 4) {
+              const oldestKey = keys[0];
+              delete newHistory[oldestKey];
+            }
+
+            return newHistory;
+          });
         })
       );
   }
 
   getHistoryGifs(query: string): Gif[] {
     return this.searchHistory()[query] ?? [];
+  }
+
+  deleteSearchFromHistory(tag: string) {
+    this.searchHistory.update(currentHistory => {
+      const newHistory = { ...currentHistory };
+      delete newHistory[tag];
+      return newHistory;
+    });
   }
 }

@@ -41,4 +41,8 @@ export class SideMenuOptionsComponent {
       route: '/dashboard/search',
     },
   ];
+
+  deleteSearch(tag: string) {
+    this.GifService.deleteSearchFromHistory(tag);
+  }
 }
