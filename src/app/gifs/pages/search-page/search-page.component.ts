@@ -15,12 +15,17 @@ export default class SearchPageComponent {
   isLoading = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
 
-  onSearch(query: string) {
+  onSearch(input: HTMLInputElement) {
+    const query = input.value;
+    if (query.trim().length === 0) return;
+
     this.hasSearched.set(true);
     this.isLoading.set(true);
     this.GifService.searchGifs(query).subscribe((resp) => {
       this.gifs.set(resp);
       this.isLoading.set(false);
     });
+
+    input.value = '';
   };
 }

@@ -1,6 +1,6 @@
 import { NgClass } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { GifService } from '../../../services/gifs.service';
 
 interface MenuOption {
@@ -26,6 +26,13 @@ interface MenuOption {
 export class SideMenuOptionsComponent {
 
   GifService = inject(GifService)
+  private router = inject(Router);
+
+  @Output() requestClose = new EventEmitter<void>();
+
+  onNavigate() {
+    this.requestClose.emit();
+  }
 
   menuOptions: MenuOption[] = [
     {
@@ -43,6 +50,10 @@ export class SideMenuOptionsComponent {
   ];
 
   deleteSearch(tag: string) {
+    if (this.router.url.includes(tag)) {
+      this.router.navigate(['/dashboard']);
+    }
+
     this.GifService.deleteSearchFromHistory(tag);
   }
 }

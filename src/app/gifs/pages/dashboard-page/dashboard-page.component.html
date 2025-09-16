@@ -2,10 +2,25 @@
   class="bg-[#111827]  w-full min-h-screen antialiased text-slate-300 selection:bg-blue-600 selection:text-white"
 >
   <div class="flex flex-col relative w-full">
-    <gifs-side-menu />
+    <gifs-side-menu 
+      [ngClass]="{'translate-x-0': sidebarVisible(), '-translate-x-full': !sidebarVisible()}"
+      (requestClose)="toggleSidebar()"
+      class="w-[220px] fixed top-0 left-0 h-full transition-transform duration-300 ease-in-out z-20 md:translate-x-0"
+    />
 
-    <div class="ml-[220px] px-4 flex flex-col flex-1 h-full text-slate-800">
-      <router-outlet />
+    <div *ngIf="sidebarVisible()" class="fixed inset-0 bg-black/50 z-10 md:hidden" (click)="toggleSidebar()"></div>
+
+    <div 
+      class="px-4 flex flex-col flex-1 h-full text-slate-800 md:ml-[220px]"
+    >
+      <header class="flex justify-start items-center pt-2">
+        <button (click)="toggleSidebar()" class="text-slate-300 hover:text-white md:hidden">
+          <i class="bi bi-list text-lg"></i>
+        </button>
+      </header>
+      <main>
+        <router-outlet />
+      </main>
     </div>
   </div>
 </div>
